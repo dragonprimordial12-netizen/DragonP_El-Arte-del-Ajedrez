@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>♟ Academia de Ajedrez · Dragón Primordial</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fire:#ff4d00;--ember:#ff8c00;--gold:#ffd700;
+  --dark:#050305;--deep:#0d0509;--blood:#8b0000;
+  --teal:#00c8a0;--purple:#9b00ff;--card-bg:rgba(20,5,10,0.85);
+  --white-sq:#f0d9b5;--black-sq:#b58863;
+  --hi-move:rgba(255,200,0,0.5);--hi-check:rgba(255,50,50,0.6);
+  --hi-valid:rgba(0,200,100,0.4);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--dark);color:#e8d5b0;font-family:'Cinzel',serif;overflow-x:hidden;min-height:100vh;}
+#particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;}
+
+/* ── TOP NAV ── */
+.top-nav{display:flex;align-items:center;justify-content:space-between;padding:0.7rem 2rem;
+  background:rgba(8,2,6,0.96);border-bottom:1px solid rgba(255,140,0,0.12);position:relative;z-index:10;flex-wrap:wrap;gap:0.5rem;}
+.nav-logo{font-family:'Cinzel Decorative',serif;font-size:0.8rem;color:var(--gold);text-decoration:none;
+  filter:drop-shadow(0 0 8px rgba(255,200,0,0.3));white-space:nowrap;}
+.nav-links{display:flex;gap:0.5rem;flex-wrap:wrap;}
+.nav-link{font-size:0.58rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,140,0,0.55);
+  text-decoration:none;padding:0.35rem 0.85rem;border:1px solid rgba(255,140,0,0.12);
+  clip-path:polygon(5px 0%,100% 0%,calc(100% - 5px) 100%,0% 100%);transition:all 0.2s;}
+.nav-link:hover{color:var(--gold);border-color:rgba(255,140,0,0.45);background:rgba(255,100,0,0.08);}
+
+/* ── HERO ── */
+.hero{position:relative;padding:3.5rem 2rem 2.5rem;text-align:center;z-index:1;
+  background:radial-gradient(ellipse 80% 50% at 50% 80%,rgba(180,40,0,0.2),transparent 70%),
+             radial-gradient(ellipse 60% 40% at 50% 0%,rgba(80,0,120,0.22),transparent 60%);}
+.eyebrow{font-size:0.62rem;letter-spacing:0.5em;color:var(--ember);text-transform:uppercase;margin-bottom:0.9rem;}
+h1{font-family:'Cinzel Decorative',serif;font-size:clamp(1.6rem,5vw,3.8rem);font-weight:900;
+  background:linear-gradient(160deg,#ffe680 0%,#ff8c00 35%,#ff2200 65%,#9b00ff 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 28px rgba(255,100,0,0.45));}
+.hero-sub{margin-top:0.7rem;font-family:'IM Fell English',serif;font-style:italic;
+  font-size:clamp(0.85rem,2vw,1.1rem);color:#d4b88a;}
+.divider{width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--fire),var(--gold),var(--fire),transparent);position:relative;z-index:1;}
+
+/* ── TABS ── */
+.tab-bar{display:flex;gap:0;background:rgba(8,2,6,0.95);border-bottom:1px solid rgba(255,140,0,0.12);
+  position:sticky;top:0;z-index:9;overflow-x:auto;}
+.tab-btn{font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;
+  padding:0.85rem 1.4rem;background:transparent;border:none;color:rgba(255,140,0,0.45);cursor:pointer;
+  border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap;}
+.tab-btn:hover{color:var(--ember);background:rgba(255,80,0,0.05);}
+.tab-btn.active{color:var(--gold);border-bottom-color:var(--ember);background:rgba(255,100,0,0.08);}
+
+/* ── CONTENT ── */
+.tab-content{display:none;max-width:1000px;margin:0 auto;padding:2.5rem 1.5rem;position:relative;z-index:1;}
+.tab-content.active{display:block;}
+
+/* ── SECTION TITLE ── */
+.sec-title{font-family:'Cinzel Decorative',serif;font-size:1.1rem;color:var(--gold);margin-bottom:0.4rem;
+  filter:drop-shadow(0 0 10px rgba(255,200,0,0.25));}
+.sec-sub{font-family:'IM Fell English',serif;font-style:italic;color:#a08060;font-size:0.95rem;margin-bottom:2rem;}
+
+/* ── PIEZAS GRID ── */
+.pieces-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-bottom:2.5rem;}
+.piece-card{background:var(--card-bg);border:1px solid rgba(255,140,0,0.18);padding:1.2rem 1rem;text-align:center;
+  transition:all 0.22s;cursor:default;}
+.piece-card:hover{border-color:var(--ember);box-shadow:0 0 20px rgba(255,120,0,0.15);transform:translateY(-2px);}
+.piece-icon{font-size:2.8rem;margin-bottom:0.5rem;line-height:1;}
+.piece-name{font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:0.3rem;}
+.piece-pts{font-size:0.6rem;letter-spacing:0.15em;color:var(--ember);margin-bottom:0.5rem;}
+.piece-desc{font-family:'IM Fell English',serif;font-style:italic;font-size:0.82rem;color:#a08060;line-height:1.45;}
+
+/* ── TABLERO INTERACTIVO ── */
+.board-section{display:flex;flex-direction:column;align-items:center;gap:1.5rem;}
+@media(min-width:700px){.board-section{flex-direction:row;align-items:flex-start;gap:2rem;}}
+.board-wrap{flex-shrink:0;}
+.board-label-row{display:flex;margin-left:24px;}
+.board-label-col{display:flex;flex-direction:column;justify-content:space-around;width:24px;align-items:center;}
+.board-lbl{font-size:0.6rem;letter-spacing:0.1em;color:rgba(255,140,0,0.4);user-select:none;height:0;}
+#chessboard{display:grid;grid-template-columns:repeat(8,1fr);width:min(360px,90vw);height:min(360px,90vw);
+  border:2px solid rgba(255,140,0,0.3);box-shadow:0 0 40px rgba(255,80,0,0.15);}
+.sq{display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:background 0.15s;}
+.sq.light{background:var(--white-sq);}
+.sq.dark{background:var(--black-sq);}
+.sq.hi-move{background:var(--hi-move)!important;}
+.sq.hi-valid::after{content:'';position:absolute;width:35%;height:35%;border-radius:50%;background:rgba(0,180,80,0.55);}
+.sq.hi-check{background:var(--hi-check)!important;}
+.sq.selected{background:rgba(255,220,0,0.55)!important;}
+.piece-svg{font-size:clamp(1.4rem,4.5vw,2.1rem);user-select:none;pointer-events:none;line-height:1;
+  text-shadow:0 1px 3px rgba(0,0,0,0.5);}
+.board-info{flex:1;min-width:0;}
+.board-info h3{font-family:'Cinzel Decorative',serif;font-size:0.85rem;color:var(--gold);margin-bottom:0.6rem;}
+.board-msg{font-family:'IM Fell English',serif;font-style:italic;font-size:0.95rem;color:#d4b88a;
+  line-height:1.5;padding:0.8rem 1rem;background:rgba(255,140,0,0.05);border-left:2px solid var(--ember);margin-bottom:1rem;}
+.board-btns{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;}
+.b-btn{font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;
+  padding:0.5rem 1rem;background:rgba(5,3,5,0.8);border:1px solid rgba(255,140,0,0.25);color:rgba(255,140,0,0.7);
+  cursor:pointer;transition:all 0.2s;clip-path:polygon(5px 0%,100% 0%,calc(100% - 5px) 100%,0% 100%);}
+.b-btn:hover{border-color:var(--ember);color:var(--gold);background:rgba(255,80,0,0.1);}
+.b-btn.primary{background:linear-gradient(135deg,#ff4500,#ff8c00);color:#fff;border:none;
+  box-shadow:0 0 20px rgba(255,80,0,0.35);}
+.b-btn.primary:hover{box-shadow:0 0 35px rgba(255,120,0,0.5);transform:translateY(-1px);}
+.move-list{max-height:180px;overflow-y:auto;font-size:0.72rem;letter-spacing:0.08em;color:#a08060;}
+.move-list::-webkit-scrollbar{width:4px;}
+.move-list::-webkit-scrollbar-track{background:rgba(255,140,0,0.05);}
+.move-list::-webkit-scrollbar-thumb{background:rgba(255,140,0,0.2);}
+.move-row{display:flex;gap:0.5rem;padding:0.2rem 0;border-bottom:1px solid rgba(255,140,0,0.07);}
+.move-num{color:rgba(255,140,0,0.35);width:24px;}
+.move-w,.move-b{flex:1;padding:0.1rem 0.3rem;}
+.move-w:hover,.move-b:hover{color:var(--gold);cursor:pointer;}
+.turn-indicator{display:inline-flex;align-items:center;gap:0.5rem;font-size:0.65rem;letter-spacing:0.2em;
+  text-transform:uppercase;padding:0.4rem 0.9rem;border:1px solid rgba(255,140,0,0.2);color:var(--ember);margin-bottom:0.8rem;}
+.turn-dot{width:10px;height:10px;border-radius:50%;}
+
+/* ── LECCIONES ── */
+.lesson-list{display:flex;flex-direction:column;gap:1rem;}
+.lesson-card{background:var(--card-bg);border:1px solid rgba(255,140,0,0.18);padding:1.4rem 1.6rem;
+  cursor:pointer;transition:all 0.22s;display:flex;align-items:flex-start;gap:1rem;}
+.lesson-card:hover{border-color:var(--ember);box-shadow:0 0 20px rgba(255,100,0,0.12);}
+.lesson-card.done{border-color:rgba(0,200,100,0.3);}
+.lesson-num{font-family:'Cinzel Decorative',serif;font-size:1.3rem;color:rgba(255,140,0,0.25);min-width:40px;}
+.lesson-card.done .lesson-num{color:rgba(0,200,100,0.5);}
+.lesson-body{}
+.lesson-title{font-size:0.78rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:0.3rem;}
+.lesson-desc{font-family:'IM Fell English',serif;font-style:italic;color:#a08060;font-size:0.88rem;line-height:1.4;}
+.lesson-tag{display:inline-block;font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;
+  padding:0.2rem 0.6rem;border:1px solid;margin-top:0.5rem;}
+.tag-basic{border-color:rgba(0,200,100,0.4);color:rgba(0,200,100,0.7);}
+.tag-inter{border-color:rgba(255,200,0,0.4);color:rgba(255,200,0,0.7);}
+.tag-adv{border-color:rgba(255,80,0,0.4);color:rgba(255,80,0,0.7);}
+
+/* ── LECCIÓN MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:100;
+  align-items:center;justify-content:center;padding:1rem;}
+.modal-overlay.open{display:flex;}
+.modal{background:#0d0509;border:1px solid rgba(255,140,0,0.3);max-width:640px;width:100%;
+  max-height:90vh;overflow-y:auto;padding:2rem;position:relative;}
+.modal::-webkit-scrollbar{width:4px;}
+.modal::-webkit-scrollbar-thumb{background:rgba(255,140,0,0.2);}
+.modal-close{position:absolute;top:1rem;right:1rem;background:transparent;border:none;
+  color:rgba(255,140,0,0.5);font-size:1.2rem;cursor:pointer;transition:color 0.2s;}
+.modal-close:hover{color:var(--gold);}
+.modal-title{font-family:'Cinzel Decorative',serif;font-size:1rem;color:var(--gold);margin-bottom:0.4rem;}
+.modal-sub{font-family:'IM Fell English',serif;font-style:italic;color:#a08060;margin-bottom:1.5rem;font-size:0.9rem;}
+.modal-body p{font-family:'IM Fell English',serif;font-style:italic;color:#d4b88a;line-height:1.7;margin-bottom:1rem;font-size:0.95rem;}
+.modal-body h4{font-size:0.7rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--ember);margin:1.2rem 0 0.5rem;}
+.modal-body ul{list-style:none;padding:0;}
+.modal-body ul li{padding:0.4rem 0;border-bottom:1px solid rgba(255,140,0,0.07);
+  font-family:'IM Fell English',serif;color:#c0a880;font-size:0.9rem;padding-left:1.2rem;position:relative;}
+.modal-body ul li::before{content:'♟';position:absolute;left:0;color:rgba(255,140,0,0.3);font-size:0.7rem;top:0.5rem;}
+.demo-board{display:grid;grid-template-columns:repeat(8,1fr);width:240px;height:240px;margin:1rem auto;
+  border:1px solid rgba(255,140,0,0.2);}
+.demo-sq{display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
+.demo-sq.light{background:#c8a882;}
+.demo-sq.dark{background:#7a5230;}
+.demo-sq.hi{background:rgba(255,220,0,0.5)!important;}
+.demo-sq.hi2{background:rgba(0,200,100,0.4)!important;}
+.mark-arrow{color:rgba(255,200,0,0.7);font-size:0.7rem;}
+
+/* ── GAMBITOS ── */
+.gambit-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.2rem;}
+.gambit-card{background:var(--card-bg);border:1px solid rgba(255,140,0,0.18);padding:1.5rem;transition:all 0.22s;cursor:pointer;}
+.gambit-card:hover{border-color:var(--ember);box-shadow:0 0 20px rgba(255,100,0,0.15);}
+.gambit-icon{font-size:2rem;margin-bottom:0.6rem;}
+.gambit-name{font-family:'Cinzel Decorative',serif;font-size:0.85rem;color:var(--gold);margin-bottom:0.4rem;}
+.gambit-moves{font-family:'Courier New',monospace;font-size:0.72rem;color:var(--teal);margin-bottom:0.5rem;letter-spacing:0.05em;}
+.gambit-desc{font-family:'IM Fell English',serif;font-style:italic;color:#a08060;font-size:0.85rem;line-height:1.4;}
+.gambit-diff{display:inline-block;font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;
+  padding:0.2rem 0.6rem;border:1px solid;margin-top:0.5rem;}
+
+/* ── QUIZ ── */
+.quiz-box{background:var(--card-bg);border:1px solid rgba(255,140,0,0.2);padding:2rem;max-width:600px;margin:0 auto;}
+.quiz-q{font-family:'IM Fell English',serif;font-style:italic;font-size:1.05rem;color:#e8d5b0;
+  line-height:1.5;margin-bottom:1.5rem;}
+.quiz-opts{display:flex;flex-direction:column;gap:0.6rem;margin-bottom:1.5rem;}
+.quiz-opt{font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;
+  padding:0.7rem 1.2rem;background:rgba(5,3,5,0.7);border:1px solid rgba(255,140,0,0.2);
+  color:rgba(255,200,100,0.7);cursor:pointer;text-align:left;transition:all 0.2s;
+  clip-path:polygon(5px 0%,100% 0%,calc(100% - 5px) 100%,0% 100%);}
+.quiz-opt:hover:not(:disabled){border-color:var(--ember);color:var(--gold);background:rgba(255,80,0,0.08);}
+.quiz-opt.correct{border-color:#00c850;color:#00ff88;background:rgba(0,200,80,0.1);}
+.quiz-opt.wrong{border-color:#ff4444;color:#ff8888;background:rgba(255,50,50,0.1);}
+.quiz-feedback{font-family:'IM Fell English',serif;font-style:italic;font-size:0.9rem;line-height:1.5;
+  padding:0.8rem 1rem;border-left:2px solid var(--ember);color:#d4b88a;display:none;}
+.quiz-feedback.show{display:block;}
+.quiz-score{display:flex;align-items:center;gap:1rem;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;
+  color:rgba(255,140,0,0.5);margin-bottom:1.5rem;}
+.quiz-score span{color:var(--gold);font-size:0.9rem;font-weight:700;}
+.progress-bar-wrap{flex:1;height:4px;background:rgba(255,140,0,0.1);}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--fire),var(--gold));transition:width 0.4s ease;}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fade-in{animation:fadeUp 0.5s ease both;}
+</style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+
+<nav class="top-nav">
+  <a class="nav-logo" href="index.html">🔥 Dragón Primordial</a>
+  <div class="nav-links">
+    <a class="nav-link" href="index.html">Arte IA</a>
+    <a class="nav-link active" href="ajedrez.html">Ajedrez</a>
+  </div>
+</nav>
+
+<div class="divider"></div>
+<div class="hero">
+  <p class="eyebrow">Academia · Dragón Primordial</p>
+  <h1>El Arte del Ajedrez</h1>
+  <p class="hero-sub">Aprende desde cero · Gambitos · Tácticas · Enroque</p>
+</div>
+<div class="divider"></div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('piezas',this)">♟ Las Piezas</button>
+  <button class="tab-btn" onclick="switchTab('tablero',this)">🏰 Tablero Libre</button>
+  <button class="tab-btn" onclick="switchTab('lecciones',this)">📖 Lecciones</button>
+  <button class="tab-btn" onclick="switchTab('gambitos',this)">⚔ Gambitos</button>
+  <button class="tab-btn" onclick="switchTab('quiz',this)">🧠 Quiz</button>
+</div>
+
+<!-- ── PIEZAS ── -->
+<div id="tab-piezas" class="tab-content active fade-in">
+  <p class="sec-title">Las 6 Piezas del Ajedrez</p>
+  <p class="sec-sub">Cada guerrero tiene su rol en el tablero — conoce su poder y su límite.</p>
+  <div class="pieces-grid">
+    <div class="piece-card"><div class="piece-icon">♔</div><div class="piece-name">Rey</div><div class="piece-pts">∞ puntos</div><div class="piece-desc">Se mueve 1 casilla en cualquier dirección. Si cae, pierdes la partida. ¡Protégelo a toda costa!</div></div>
+    <div class="piece-card"><div class="piece-icon">♕</div><div class="piece-name">Reina</div><div class="piece-pts">9 puntos</div><div class="piece-desc">La pieza más poderosa. Se mueve cualquier número de casillas en cualquier dirección: filas, columnas y diagonales.</div></div>
+    <div class="piece-card"><div class="piece-icon">♖</div><div class="piece-name">Torre</div><div class="piece-pts">5 puntos</div><div class="piece-desc">Se mueve en línea recta: horizontal o vertical. Esencial en el enroque y para controlar columnas abiertas.</div></div>
+    <div class="piece-card"><div class="piece-icon">♗</div><div class="piece-name">Alfil</div><div class="piece-pts">3 puntos</div><div class="piece-desc">Solo se mueve en diagonal. Siempre permanece en el mismo color. Los dos alfiles se complementan perfectamente.</div></div>
+    <div class="piece-card"><div class="piece-icon">♘</div><div class="piece-name">Caballo</div><div class="piece-pts">3 puntos</div><div class="piece-desc">Se mueve en "L": 2 casillas en una dirección y 1 perpendicular. ¡El único que puede saltar piezas!</div></div>
+    <div class="piece-card"><div class="piece-icon">♙</div><div class="piece-name">Peón</div><div class="piece-pts">1 punto</div><div class="piece-desc">Avanza 1 casilla (o 2 en su primer movimiento). Captura en diagonal. Si llega al final, ¡se convierte en cualquier pieza!</div></div>
+  </div>
+  <div style="background:var(--card-bg);border:1px solid rgba(255,140,0,0.18);padding:1.5rem;margin-top:0.5rem;">
+    <p style="font-family:'Cinzel Decorative',serif;font-size:0.8rem;color:var(--gold);margin-bottom:1rem;">⚔ Reglas Especiales Esenciales</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;">
+      <div style="padding:1rem;border-left:2px solid var(--ember);">
+        <p style="font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--ember);margin-bottom:0.4rem;">Enroque</p>
+        <p style="font-family:'IM Fell English',serif;font-style:italic;color:#a08060;font-size:0.85rem;line-height:1.4;">El Rey se mueve 2 casillas hacia la Torre, y la Torre salta al otro lado. Requiere que ninguna pieza esté en medio y que ni el Rey ni la Torre se hayan movido antes.</p>
+      </div>
+      <div style="padding:1rem;border-left:2px solid var(--ember);">
+        <p style="font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--ember);margin-bottom:0.4rem;">Al Paso (En Passant)</p>
+        <p style="font-family:'IM Fell English',serif;font-style:italic;color:#a08060;font-size:0.85rem;line-height:1.4;">Si un peón avanza 2 casillas y queda al lado de un peón rival, ese peón puede capturarlo como si solo hubiera avanzado 1. Solo se puede hacer en el turno inmediato.</p>
+      </div>
+      <div style="padding:1rem;border-left:2px solid var(--ember);">
+        <p style="font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--ember);margin-bottom:0.4rem;">Coronación</p>
+        <p style="font-family:'IM Fell English',serif;font-style:italic;color:#a08060;font-size:0.85rem;line-height:1.4;">Cuando un peón llega al extremo opuesto del tablero, se convierte en cualquier pieza (usualmente una Reina). Es una victoria táctica enorme.</p>
+      </div>
+      <div style="padding:1rem;border-left:2px solid var(--ember);">
+        <p style="font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--ember);margin-bottom:0.4rem;">Jaque y Jaque Mate</p>
+        <p style="font-family:'IM Fell English',serif;font-style:italic;color:#a08060;font-size:0.85rem;line-height:1.4;">Jaque = amenaza al Rey. Debes protegerlo. Jaque Mate = el Rey no puede escapar → fin de la partida. El objetivo final del juego.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TABLERO LIBRE ── -->
+<div id="tab-tablero" class="tab-content fade-in">
+  <p class="sec-title">Tablero Libre</p>
+  <p class="sec-sub">Juega contra ti mismo o experimenta movimientos. Haz clic en una pieza para ver sus movimientos válidos.</p>
+  <div class="board-section">
+    <div class="board-wrap">
+      <div class="board-label-row">
+        <div id="board-cols" style="display:flex;margin-left:24px;"></div>
+      </div>
+      <div style="display:flex;">
+        <div class="board-label-col" id="board-rows"></div>
+        <div id="chessboard"></div>
+      </div>
+    </div>
+    <div class="board-info">
+      <div class="turn-indicator" id="turnInd">
+        <div class="turn-dot" id="turnDot" style="background:#fff;"></div>
+        <span id="turnText">Turno de las BLANCAS</span>
+      </div>
+      <h3>Registro de Movimientos</h3>
+      <div class="board-msg" id="boardMsg">Haz clic en cualquier pieza blanca para comenzar. Las casillas verdes muestran los movimientos válidos.</div>
+      <div class="board-btns">
+        <button class="b-btn primary" onclick="resetBoard()">↺ Reiniciar</button>
+        <button class="b-btn" onclick="undoMove()">← Deshacer</button>
+        <button class="b-btn" onclick="setupDemo('castling')">Torre → Enroque</button>
+        <button class="b-btn" onclick="setupDemo('promotion')">Peón → Coronación</button>
+      </div>
+      <div class="move-list" id="moveList"><div style="color:rgba(255,140,0,0.3);font-family:'IM Fell English',serif;font-style:italic;">Los movimientos aparecerán aquí...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── LECCIONES ── -->
+<div id="tab-lecciones" class="tab-content fade-in">
+  <p class="sec-title">Lecciones Paso a Paso</p>
+  <p class="sec-sub">Desde los fundamentos hasta tácticas avanzadas. Haz clic en una lección para abrirla.</p>
+  <div class="lesson-list" id="lessonList"></div>
+</div>
+
+<!-- ── GAMBITOS ── -->
+<div id="tab-gambitos" class="tab-content fade-in">
+  <p class="sec-title">Gambitos y Aperturas</p>
+  <p class="sec-sub">Las aperturas más usadas del mundo — aprende las primeras jugadas maestras.</p>
+  <div class="gambit-list" id="gambitList"></div>
+</div>
+
+<!-- ── QUIZ ── -->
+<div id="tab-quiz" class="tab-content fade-in">
+  <p class="sec-title">Pon a Prueba tu Conocimiento</p>
+  <p class="sec-sub">10 preguntas sobre ajedrez — ¿cuántas puedes responder correctamente?</p>
+  <div class="quiz-box" id="quizBox">
+    <div class="quiz-score">
+      Puntuación: <span id="scoreNum">0</span> / <span id="scoreTotal">10</span>
+      &nbsp;·&nbsp; Pregunta <span id="qNum">1</span>/10
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="quizProgress" style="width:10%"></div></div>
+    </div>
+    <div class="quiz-q" id="quizQ"></div>
+    <div class="quiz-opts" id="quizOpts"></div>
+    <div class="quiz-feedback" id="quizFeedback"></div>
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+      <button class="b-btn primary" id="nextBtn" onclick="nextQuestion()" style="display:none;">Siguiente →</button>
+      <button class="b-btn" onclick="resetQuiz()">↺ Reiniciar Quiz</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LECCIONES -->
+<div class="modal-overlay" id="lessonModal" onclick="if(event.target===this)closeLessonModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeLessonModal()">✕</button>
+    <div id="lessonModalContent"></div>
+  </div>
+</div>
+
+<!-- MODAL GAMBITOS -->
+<div class="modal-overlay" id="gambitModal" onclick="if(event.target===this)closeGambitModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeGambitModal()">✕</button>
+    <div id="gambitModalContent"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'tablero') { renderBoard(); renderMoveList(); }
+}
+
+// ═══════════════════════════════════════
+// CHESS ENGINE (simplified)
+// ═══════════════════════════════════════
+const FILES = ['a','b','c','d','e','f','g','h'];
+const PIECES_WHITE = { K:'♔', Q:'♕', R:'♖', B:'♗', N:'♘', P:'♙' };
+const PIECES_BLACK = { K:'♚', Q:'♛', R:'♜', B:'♝', N:'♞', P:'♟' };
+
+let board = [];
+let turn = 'w';
+let selected = null;
+let validMoves = [];
+let moveHistory = [];
+let boardHistory = [];
+let whiteCanCastleK = true, whiteCanCastleQ = true;
+let blackCanCastleK = true, blackCanCastleQ = true;
+
+function initBoard() {
+  board = Array(8).fill(null).map(() => Array(8).fill(null));
+  // Black pieces (row 0)
+  const back = ['R','N','B','Q','K','B','N','R'];
+  for (let c = 0; c < 8; c++) {
+    board[0][c] = { color:'b', type: back[c] };
+    board[1][c] = { color:'b', type:'P' };
+    board[6][c] = { color:'w', type:'P' };
+    board[7][c] = { color:'w', type: back[c] };
+  }
+  turn = 'w'; selected = null; validMoves = []; moveHistory = []; boardHistory = [];
+  whiteCanCastleK = whiteCanCastleQ = blackCanCastleK = blackCanCastleQ = true;
+}
+
+function pieceChar(p) {
+  if (!p) return '';
+  return p.color === 'w' ? PIECES_WHITE[p.type] : PIECES_BLACK[p.type];
+}
+
+function inBounds(r,c){ return r>=0&&r<8&&c>=0&&c<8; }
+
+function getValidMoves(r, c) {
+  const p = board[r][c];
+  if (!p) return [];
+  const moves = [];
+  const enemy = p.color === 'w' ? 'b' : 'w';
+
+  function addMove(nr, nc, onlyCapture=false, noCapture=false) {
+    if (!inBounds(nr,nc)) return false;
+    const t = board[nr][nc];
+    if (t && t.color === p.color) return false;
+    if (noCapture && t) return false;
+    if (onlyCapture && !t) return false;
+    moves.push([nr,nc]);
+    return !t;
+  }
+
+  function slide(dr, dc) {
+    let nr = r+dr, nc = c+dc;
+    while(inBounds(nr,nc)) {
+      if(!addMove(nr,nc)) break;
+      nr+=dr; nc+=dc;
+    }
+  }
+
+  if (p.type === 'P') {
+    const dir = p.color === 'w' ? -1 : 1;
+    const startRow = p.color === 'w' ? 6 : 1;
+    addMove(r+dir, c, false, true);
+    if (r === startRow && !board[r+dir][c]) addMove(r+2*dir, c, false, true);
+    addMove(r+dir, c-1, true);
+    addMove(r+dir, c+1, true);
+  }
+  else if (p.type === 'N') {
+    [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]].forEach(([dr,dc]) => addMove(r+dr,c+dc));
+  }
+  else if (p.type === 'B') { [[-1,-1],[-1,1],[1,-1],[1,1]].forEach(([dr,dc]) => slide(dr,dc)); }
+  else if (p.type === 'R') { [[-1,0],[1,0],[0,-1],[0,1]].forEach(([dr,dc]) => slide(dr,dc)); }
+  else if (p.type === 'Q') { [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]].forEach(([dr,dc]) => slide(dr,dc)); }
+  else if (p.type === 'K') {
+    [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]].forEach(([dr,dc]) => addMove(r+dr,c+dc));
+    // Castling
+    const row = p.color === 'w' ? 7 : 0;
+    if (r === row && c === 4) {
+      if (p.color==='w' && whiteCanCastleK && !board[row][5] && !board[row][6] && board[row][7]?.type==='R')
+        moves.push([row,6,'castle']);
+      if (p.color==='w' && whiteCanCastleQ && !board[row][3] && !board[row][2] && !board[row][1] && board[row][0]?.type==='R')
+        moves.push([row,2,'castle']);
+      if (p.color==='b' && blackCanCastleK && !board[row][5] && !board[row][6] && board[row][7]?.type==='R')
+        moves.push([row,6,'castle']);
+      if (p.color==='b' && blackCanCastleQ && !board[row][3] && !board[row][2] && !board[row][1] && board[row][0]?.type==='R')
+        moves.push([row,2,'castle']);
+    }
+  }
+  return moves;
+}
+
+function makeMove(fr, fc, tr, tc, special) {
+  boardHistory.push(JSON.stringify(board));
+  const piece = board[fr][fc];
+  const captured = board[tr][tc];
+  let notation = '';
+  if (special === 'castle') {
+    const row = piece.color === 'w' ? 7 : 0;
+    if (tc === 6) {
+      board[row][6] = piece; board[row][4] = null;
+      board[row][5] = board[row][7]; board[row][7] = null;
+      notation = 'O-O';
+    } else {
+      board[row][2] = piece; board[row][4] = null;
+      board[row][3] = board[row][0]; board[row][0] = null;
+      notation = 'O-O-O';
+    }
+  } else {
+    board[tr][tc] = piece;
+    board[fr][fc] = null;
+    notation = (captured ? 'x' : '') + FILES[tc] + (8-tr);
+    if (piece.type !== 'P') notation = piece.type + notation;
+    // Promotion
+    if (piece.type === 'P' && (tr === 0 || tr === 7)) {
+      board[tr][tc] = { color: piece.color, type: 'Q' };
+      notation += '=Q';
+      setMsg('¡Coronación! El peón asciende a Reina. 👑');
+    }
+  }
+  // Castling rights
+  if (piece.type === 'K') { if(piece.color==='w'){whiteCanCastleK=whiteCanCastleQ=false;}else{blackCanCastleK=blackCanCastleQ=false;} }
+  if (piece.type === 'R') {
+    if(piece.color==='w'){if(fc===0)whiteCanCastleQ=false;if(fc===7)whiteCanCastleK=false;}
+    else{if(fc===0)blackCanCastleQ=false;if(fc===7)blackCanCastleK=false;}
+  }
+  moveHistory.push({ from:[fr,fc], to:[tr,tc], notation, color: piece.color });
+  turn = turn === 'w' ? 'b' : 'w';
+}
+
+function resetBoard() { initBoard(); renderBoard(); renderMoveList(); setMsg('Tablero reiniciado. Las blancas comienzan.'); }
+function undoMove() {
+  if (!boardHistory.length) return;
+  board = JSON.parse(boardHistory.pop());
+  moveHistory.pop();
+  turn = turn === 'w' ? 'b' : 'w';
+  selected = null; validMoves = [];
+  renderBoard(); renderMoveList();
+  setMsg('Movimiento deshecho.');
+}
+
+function setupDemo(type) {
+  initBoard();
+  if (type === 'castling') {
+    board[7][5] = null; board[7][6] = null;
+    board[7][1] = null; board[7][2] = null; board[7][3] = null;
+    setMsg('Demo de Enroque: Las piezas entre el Rey y las Torres han sido removidas. Selecciona el Rey (e1) y podrás enrocar a ambos lados.');
+  } else if (type === 'promotion') {
+    initBoard();
+    board[1][4] = { color:'w', type:'P' };
+    board[6] = board[6].map(() => null);
+    setMsg('Demo de Coronación: Hay un peón blanco listo para coronar. Selecciónalo y avanza hasta la última fila.');
+  }
+  renderBoard(); renderMoveList();
+}
+
+function setMsg(txt) { document.getElementById('boardMsg').textContent = txt; }
+
+function onSquareClick(r, c) {
+  const p = board[r][c];
+  if (selected) {
+    const mv = validMoves.find(m => m[0]===r && m[1]===c);
+    if (mv) {
+      makeMove(selected[0], selected[1], r, c, mv[2]);
+      selected = null; validMoves = [];
+      renderBoard(); renderMoveList();
+      setMsg(turn==='w' ? 'Turno de las BLANCAS.' : 'Turno de las NEGRAS.');
+      return;
+    }
+  }
+  if (p && p.color === turn) {
+    selected = [r,c];
+    validMoves = getValidMoves(r, c);
+    renderBoard();
+    const pName = {K:'Rey',Q:'Reina',R:'Torre',B:'Alfil',N:'Caballo',P:'Peón'}[p.type];
+    setMsg(`${pName} seleccionado. ${validMoves.length} movimientos posibles.`);
+  } else {
+    selected = null; validMoves = [];
+    renderBoard();
+  }
+}
+
+function renderBoard() {
+  const cb = document.getElementById('chessboard');
+  if (!cb) return;
+  cb.innerHTML = '';
+  // Labels
+  const colLabels = document.getElementById('board-cols');
+  const rowLabels = document.getElementById('board-rows');
+  if (colLabels) { colLabels.innerHTML = ''; FILES.forEach(f => { const d=document.createElement('div'); d.style.cssText='width:'+(parseInt(cb.style.width||'360')/8||45)+'px;text-align:center;font-size:0.55rem;letter-spacing:0.1em;color:rgba(255,140,0,0.35);'; d.textContent=f; colLabels.appendChild(d); }); }
+  if (rowLabels) { rowLabels.innerHTML = ''; for(let r=0;r<8;r++){const d=document.createElement('div'); d.style.cssText='font-size:0.55rem;letter-spacing:0.1em;color:rgba(255,140,0,0.35);height:'+(parseInt(cb.style.height||'360')/8||45)+'px;display:flex;align-items:center;justify-content:center;'; d.textContent=8-r; rowLabels.appendChild(d); } }
+
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const sq = document.createElement('div');
+      sq.className = 'sq ' + ((r+c)%2===0 ? 'light':'dark');
+      if (selected && selected[0]===r && selected[1]===c) sq.classList.add('selected');
+      if (validMoves.some(m=>m[0]===r&&m[1]===c)) sq.classList.add('hi-valid');
+      const p = board[r][c];
+      if (p) { const s = document.createElement('span'); s.className='piece-svg'; s.textContent=pieceChar(p); sq.appendChild(s); }
+      sq.addEventListener('click', () => onSquareClick(r,c));
+      cb.appendChild(sq);
+    }
+  }
+  const ti = document.getElementById('turnInd');
+  const td = document.getElementById('turnDot');
+  const tt = document.getElementById('turnText');
+  if (ti){ td.style.background = turn==='w'?'#fff':'#222'; td.style.border=turn==='b'?'2px solid #aaa':'none'; tt.textContent = turn==='w'?'Turno de las BLANCAS':'Turno de las NEGRAS'; }
+}
+
+function renderMoveList() {
+  const ml = document.getElementById('moveList');
+  if (!ml) return;
+  if (!moveHistory.length) { ml.innerHTML='<div style="color:rgba(255,140,0,0.3);font-family:\'IM Fell English\',serif;font-style:italic;">Los movimientos aparecerán aquí...</div>'; return; }
+  let html = '';
+  for (let i = 0; i < moveHistory.length; i += 2) {
+    const w = moveHistory[i];
+    const b = moveHistory[i+1];
+    html += `<div class="move-row"><span class="move-num">${Math.floor(i/2)+1}.</span><span class="move-w">${w.notation}</span><span class="move-b">${b?b.notation:''}</span></div>`;
+  }
+  ml.innerHTML = html;
+  ml.scrollTop = ml.scrollHeight;
+}
+
+// ═══════════════════════════════════════
+// LECCIONES
+// ═══════════════════════════════════════
+const LESSONS = [
+  { id:1, title:'El Tablero y las Coordenadas', desc:'Aprende a orientarte en el tablero con el sistema de notación algebraica.', tag:'basic',
+    content:`<p>El tablero de ajedrez tiene 64 casillas (8×8). Las <strong>columnas</strong> se llaman <em>columnas a-h</em> (de izquierda a derecha para las blancas) y las <strong>filas</strong> se numeran del 1 al 8 (fila 1 = lado blanco, fila 8 = lado negro).</p>
+    <h4>Notación Algebraica</h4><p>Cada casilla tiene un nombre: letra de columna + número de fila. Por ejemplo, <em>e4</em> es la columna e, fila 4. Así se registran todos los movimientos.</p>
+    <h4>Orientación del tablero</h4><ul><li>Las blancas siempre están en las filas 1 y 2</li><li>Las negras siempre están en las filas 7 y 8</li><li>La esquina inferior derecha de las blancas es siempre una casilla CLARA</li><li>La Reina siempre empieza en su propio color (reina blanca en casilla blanca)</li></ul>` },
+  { id:2, title:'Objetivo del Juego: El Jaque Mate', desc:'Entender qué es el jaque, el jaque mate y el ahogado.', tag:'basic',
+    content:`<p>El objetivo del ajedrez es dar <em>Jaque Mate</em> al Rey rival. Esto ocurre cuando el Rey está amenazado (en jaque) y no tiene ningún movimiento legal para escapar.</p>
+    <h4>Tipos de final</h4><ul><li><strong>Jaque:</strong> El Rey está amenazado. Debes salir del jaque obligatoriamente.</li><li><strong>Jaque Mate:</strong> El Rey está en jaque y no puede escapar. ¡Fin de la partida!</li><li><strong>Ahogado (Stalemate):</strong> El jugador no tiene movimientos legales pero su Rey NO está en jaque. Resultado: Tablas.</li><li><strong>Tablas:</strong> Empate por acuerdo, repetición de posición, material insuficiente o regla de 50 movimientos.</li></ul>
+    <p>Cuando tu Rey está en jaque, tienes exactamente 3 opciones: mover el Rey, bloquear el jaque con una pieza, o capturar la pieza atacante.</p>` },
+  { id:3, title:'El Enroque — Seguridad del Rey', desc:'La maniobra especial más importante para proteger a tu Rey.', tag:'basic',
+    content:`<p>El Enroque es el único movimiento en ajedrez donde mueves DOS piezas a la vez. El Rey se mueve 2 casillas hacia la Torre, y la Torre salta al otro lado del Rey.</p>
+    <h4>Tipos de enroque</h4><ul><li><strong>Enroque Corto (O-O):</strong> Hacia el lado del Rey (columna h). Es el más común y generalmente más seguro.</li><li><strong>Enroque Largo (O-O-O):</strong> Hacia el lado de la Reina (columna a). Más agresivo pero el Rey queda más expuesto.</li></ul>
+    <h4>Condiciones obligatorias</h4><ul><li>El Rey NO se haya movido antes en la partida</li><li>La Torre correspondiente NO se haya movido antes</li><li>No hay piezas entre el Rey y la Torre</li><li>El Rey no está en jaque en ese momento</li><li>El Rey no cruza ninguna casilla atacada por el enemigo</li></ul>
+    <p>El enroque es esencial: conecta tus Torres y pone al Rey a salvo detrás de los peones. ¡Enroca temprano en la mayoría de las partidas!</p>` },
+  { id:4, title:'Los Principios de la Apertura', desc:'Las 3 reglas de oro para empezar bien cualquier partida.', tag:'inter',
+    content:`<p>La apertura son los primeros movimientos de la partida. Una buena apertura te da una ventaja duradera. Tres principios fundamentales:</p>
+    <h4>1. Controla el Centro</h4><p>Las casillas e4, e5, d4 y d5 son el corazón del tablero. Las piezas en el centro controlan más casillas y atacan en más direcciones. Los movimientos <em>1.e4</em> o <em>1.d4</em> son los más populares del mundo por esto.</p>
+    <h4>2. Desarrolla tus Piezas Menores Primero</h4><p>Los Caballos y Alfiles deben salir a buenas casillas lo antes posible. No muevas la misma pieza dos veces en la apertura sin razón urgente. No saques la Reina demasiado pronto.</p>
+    <h4>3. Enroca Temprano</h4><p>Después de desarrollar tus piezas menores, enroca para poner al Rey a salvo y conectar tus Torres. Un Rey en el centro es vulnerable durante el medio juego.</p>
+    <h4>Errores comunes a evitar</h4><ul><li>Mover muchos peones en la apertura</li><li>Sacar la Reina antes de desarrollar otras piezas</li><li>Ignorar el desarrollo del rival</li><li>No enrocar cuando tienes la oportunidad</li></ul>` },
+  { id:5, title:'Tácticas: Horquilla, Clavada y Descubierta', desc:'Las tres tácticas más comunes que ganarán partidas.', tag:'inter',
+    content:`<p>Las tácticas son combinaciones cortas (1-3 movimientos) que ganan material o dan jaque mate. Son la base del ajedrez táctico.</p>
+    <h4>Horquilla (Fork)</h4><p>Una pieza ataca DOS o más piezas rivales al mismo tiempo. El rival solo puede salvar una. El Caballo es el maestro de las horquillas por su movimiento en "L". Ejemplo: Un Caballo en e5 puede atacar simultáneamente al Rey en d7 y a la Reina en c4.</p>
+    <h4>Clavada (Pin)</h4><p>Una pieza ataca a una pieza rival que, si se mueve, expone a una pieza más valiosa detrás. Ejemplo: Un Alfil apunta al Caballo rival, y detrás del Caballo está el Rey. El Caballo está "clavado" y no puede moverse sin exponer al Rey.</p>
+    <h4>Ataque Descubierto</h4><p>Una pieza se mueve y descubre el ataque de otra pieza detrás. El rival debe defenderse del ataque descubierto Y del movimiento de la pieza que se movió. Muy difícil de defender simultáneamente.</p>
+    <p>Practica buscando estas tácticas en cada posición. ¡Pregúntate siempre: ¿qué piezas rivales están en línea? ¿Puedo atacar dos cosas a la vez?</p>` },
+  { id:6, title:'Finales Básicos — Cómo Ganar con Ventaja', desc:'Rey y Dama vs Rey solitario: el final más común.', tag:'adv',
+    content:`<p>Los finales ocurren cuando quedan pocas piezas. Saber los finales es decisivo: muchas partidas se empatan por no saber técnica.</p>
+    <h4>Rey y Reina vs Rey</h4><p>Es el final más básico. La técnica: acorrala al Rey rival en una esquina o borde usando tu Reina para restringir su espacio, luego acerca tu Rey para dar Jaque Mate. El Jaque Mate se da generalmente en las esquinas.</p>
+    <h4>La oposición del Rey</h4><p>En finales de peones, los Reyes se "enfrentan": cuando dos Reyes están separados por una casilla, el que tiene que moverse pierde la "oposición". Quien tenga la oposición controla el acceso al tablero.</p>
+    <h4>Regla del Cuadrado</h4><p>Para saber si tu Rey puede atrapar a un peón enemigo que avanza: traza un cuadrado imaginario desde el peón hasta su casilla de coronación. Si tu Rey puede entrar en ese cuadrado en su turno, puede atrapar el peón.</p>
+    <h4>Peones pasados</h4><p>Un peón sin peones rivales en su columna ni en las columnas adyacentes es un peón pasado. Tiene gran potencial de coronar. En los finales, ¡un peón pasado avanzado puede ser decisivo!</p>` },
+];
+
+function renderLessons() {
+  const container = document.getElementById('lessonList');
+  const done = JSON.parse(localStorage.getItem('dp_lessons_done') || '[]');
+  container.innerHTML = LESSONS.map(l => `
+    <div class="lesson-card ${done.includes(l.id)?'done':''}" onclick="openLesson(${l.id})">
+      <div class="lesson-num">${String(l.id).padStart(2,'0')}</div>
+      <div class="lesson-body">
+        <div class="lesson-title">${l.title}</div>
+        <div class="lesson-desc">${l.desc}</div>
+        <span class="lesson-tag tag-${l.tag}">${l.tag==='basic'?'Básico':l.tag==='inter'?'Intermedio':'Avanzado'}</span>
+        ${done.includes(l.id)?'<span class="lesson-tag tag-basic" style="margin-left:4px;">✓ Completada</span>':''}
+      </div>
+    </div>`).join('');
+}
+
+function openLesson(id) {
+  const l = LESSONS.find(x=>x.id===id);
+  document.getElementById('lessonModalContent').innerHTML = `
+    <div class="modal-title">${l.title}</div>
+    <div class="modal-sub">${l.desc}</div>
+    <div class="modal-body">${l.content}</div>
+    <div style="margin-top:1.5rem;display:flex;gap:0.5rem;">
+      <button class="b-btn primary" onclick="markLessonDone(${id})">✓ Marcar como completada</button>
+    </div>`;
+  document.getElementById('lessonModal').classList.add('open');
+}
+function closeLessonModal() { document.getElementById('lessonModal').classList.remove('open'); }
+function markLessonDone(id) {
+  const done = JSON.parse(localStorage.getItem('dp_lessons_done')||'[]');
+  if (!done.includes(id)) done.push(id);
+  localStorage.setItem('dp_lessons_done', JSON.stringify(done));
+  closeLessonModal(); renderLessons();
+}
+
+// ═══════════════════════════════════════
+// GAMBITOS
+// ═══════════════════════════════════════
+const GAMBITS = [
+  { icon:'🔥', name:'Gambito de Rey', moves:'1.e4 e5 2.f4', diff:'inter', color:'ba',
+    desc:'Blancas ofrecen el peón f4 a cambio de control del centro. Una de las aperturas más antiguas y agresivas. Objetivo: abrir la columna f para atacar.',
+    detail:`<p>El Gambito de Rey es una de las aperturas más antiguas del ajedrez, popular desde el siglo XVI. Las blancas sacrifican el peón de f4 para ganar control central y crear juego de ataque.</p>
+    <h4>Líneas principales</h4><ul><li><strong>Gambito de Rey Aceptado (2...exf4):</strong> Las negras toman el peón. Las blancas deben atacar rápido antes de que consoliden la ventaja material.</li><li><strong>Gambito de Rey Rechazado (2...Bc5):</strong> Las negras rechazan el gambito. Posición más sólida pero menos dinámica.</li></ul>
+    <h4>Plan de las blancas</h4><ul><li>Recuperar el peón o ganar compensación posicional</li><li>Controlar el centro con d4</li><li>Atacar por la columna f abierta</li><li>Desarrollar piezas rápidamente hacia el Rey negro</li></ul>
+    <p>Jugadores legendarios como Paul Morphy y Adolf Anderssen usaron el Gambito de Rey para crear las partidas más brillantes de la historia.</p>` },
+  { icon:'♟', name:'Gambito de Dama', moves:'1.d4 d5 2.c4', diff:'basic', color:'bt',
+    desc:'La apertura más popular del ajedrez moderno. Blancas atacan el centro con c4. Si las negras aceptan, las blancas recuperan fácilmente.',
+    detail:`<p>El Gambito de Dama es técnicamente un gambito, pero muy difícil de aceptar con éxito. Es la apertura más jugada en torneos de élite.</p>
+    <h4>Variantes principales</h4><ul><li><strong>Gambito de Dama Aceptado (2...dxc4):</strong> Las negras toman el peón. Las blancas recuperan con e4 o con alfiles, ganando control central.</li><li><strong>Defensa Eslava (2...c6):</strong> Las negras apoyan d5 con c6. Muy sólida y popular.</li><li><strong>Defensa Nimzo-India (2...Nf6 3.Nc3 Bb4):</strong> Las negras ceden el centro pero obtienen compensación con el alfil clavando al caballo.</li></ul>
+    <h4>Principio clave</h4><p>El Gambito de Dama enseña los conceptos de control central, estructura de peones y juego posicional. Es perfecto para aprender ajedrez estratégico.</p>` },
+  { icon:'⚔', name:'Apertura Italiana', moves:'1.e4 e5 2.Nf3 Nc6 3.Bc4', diff:'basic', color:'bp',
+    desc:'Una de las aperturas más antiguas. Desarrolla piezas hacia el centro y apunta al punto f7, el talón de Aquiles de las negras.',
+    detail:`<p>La Apertura Italiana, también llamada Giuoco Piano ("juego tranquilo" en italiano), es perfecta para principiantes y jugadores intermedios.</p>
+    <h4>Objetivos</h4><ul><li>Desarrollar el Alfil a c4, apuntando al peón f7</li><li>Preparar el enroque rápidamente</li><li>Controlar el centro con peones d3 y e4</li></ul>
+    <h4>Variante del Ataque Fried Liver</h4><p>Después de 3...Nf6 4.Ng5 d5 5.exd5 Nxd5 6.Nxf7! es uno de los sacrificios más espectaculares del ajedrez. El Caballo entra a f7 para destruir la posición del Rey negro. ¡Solo para los valientes!</p>` },
+  { icon:'🐉', name:'Defensa Siciliana', moves:'1.e4 c5', diff:'adv', color:'bc',
+    desc:'La respuesta más popular y combativa contra 1.e4. Las negras evitan el espejo simétrico y crean tensión inmediata en el flanco de dama.',
+    detail:`<p>La Defensa Siciliana es la apertura más jugada en el ajedrez moderno a nivel profesional. Es asimétrica por naturaleza, lo que lleva a posiciones complejas y emocionantes.</p>
+    <h4>Variantes principales</h4><ul><li><strong>Siciliana Najdorf:</strong> 1.e4 c5 2.Nf3 d6 3.d4 cxd4 4.Nxd4 Nf6 5.Nc3 a6. La favorita de Fischer y Kasparov. Muy teórica.</li><li><strong>Siciliana Dragón:</strong> Las negras forman una cadena de peones en forma de dragón. Muy agresiva y con ataques mutuos.</li><li><strong>Siciliana Cerrada:</strong> Las blancas no abren el centro con d4. Juego más posicional.</li></ul>
+    <p>La Siciliana demuestra que en ajedrez no es necesario imitar al rival. ¡Crea tu propio juego desde el primer movimiento!</p>` },
+  { icon:'🏰', name:'Apertura Española (Ruy López)', moves:'1.e4 e5 2.Nf3 Nc6 3.Bb5', diff:'inter', color:'bt',
+    desc:'Una de las aperturas con más teoría en el mundo. El alfil presiona el Caballo que defiende e5, buscando ventaja a largo plazo.',
+    detail:`<p>La Apertura Española, o Ruy López, fue analizada por el sacerdote español Ruy López de Segura en 1561. Hoy sigue siendo una de las aperturas más estudiadas.</p>
+    <h4>Idea principal</h4><p>El Alfil en b5 amenaza indirectamente el peón e5: si las negras no tienen cuidado, las blancas pueden ganar ese peón. Pero las negras tienen muchos métodos de defensa.</p>
+    <h4>Defensas populares</h4><ul><li><strong>Defensa Berlinesa (3...Nf6):</strong> Popularizada por Kramnik. Muy sólida, lleva a finales técnicos.</li><li><strong>Variante Cerrada (3...a6 4.Ba4 Nf6 5.0-0 Be7 6.Re1 b5 7.Bb3 d6 8.c3 0-0):</strong> La lucha posicional clásica.</li><li><strong>Variante Abierta (3...a6 4.Ba4 Nf6 5.0-0 Nxe4):</strong> Las negras toman el peón. Posición complicada y táctica.</li></ul>` },
+  { icon:'🌪', name:'Apertura Inglesa', moves:'1.c4', diff:'inter', color:'bp',
+    desc:'Un enfoque posicional e hiperodermoderno. Las blancas controlan el centro desde las alas en lugar de ocuparlo directamente.',
+    detail:`<p>La Apertura Inglesa es una elección posicional y flexible. Bobby Fischer y Garry Kasparov la usaron regularmente para evitar la teoría en 1.e4 y 1.d4.</p>
+    <h4>Filosofía hipermoderna</h4><p>En lugar de ocupar el centro con peones, las blancas lo controlan desde las alas. El peón c4 presiona la casilla d5 desde lejos.</p>
+    <h4>Transposiciones comunes</h4><ul><li>Puede transponerse a posiciones del Gambito de Dama</li><li>Puede llevar a la Defensa Nimzo-India</li><li>Estructuras de Hedgehog (erizo) donde las negras esperan en las últimas filas</li></ul>
+    <p>La Inglesa es perfecta si quieres juego posicional, evitar mucha teoría de aperturas y crear presión duradera sin comprometerte.</p>` },
+];
+
+function renderGambits() {
+  const diffLabel = {basic:'Básico', inter:'Intermedio', adv:'Avanzado'};
+  const diffBorder = {basic:'rgba(0,200,100,0.4)', inter:'rgba(255,200,0,0.4)', adv:'rgba(255,80,0,0.4)'};
+  const diffColor = {basic:'rgba(0,200,100,0.7)', inter:'rgba(255,200,0,0.7)', adv:'rgba(255,80,0,0.7)'};
+  document.getElementById('gambitList').innerHTML = GAMBITS.map((g,i) => `
+    <div class="gambit-card" onclick="openGambit(${i})">
+      <div class="gambit-icon">${g.icon}</div>
+      <div class="gambit-name">${g.name}</div>
+      <div class="gambit-moves">${g.moves}</div>
+      <div class="gambit-desc">${g.desc}</div>
+      <span class="gambit-diff" style="border-color:${diffBorder[g.diff]};color:${diffColor[g.diff]}">${diffLabel[g.diff]}</span>
+    </div>`).join('');
+}
+
+function openGambit(i) {
+  const g = GAMBITS[i];
+  document.getElementById('gambitModalContent').innerHTML = `
+    <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.3rem;">
+      <span style="font-size:2rem;">${g.icon}</span>
+      <div class="modal-title">${g.name}</div>
+    </div>
+    <div class="modal-sub" style="font-family:'Courier New',monospace;font-style:normal;color:var(--teal);letter-spacing:0.05em;">${g.moves}</div>
+    <div class="modal-body">${g.detail}</div>`;
+  document.getElementById('gambitModal').classList.add('open');
+}
+function closeGambitModal() { document.getElementById('gambitModal').classList.remove('open'); }
+
+// ═══════════════════════════════════════
+// QUIZ
+// ═══════════════════════════════════════
+const QUESTIONS = [
+  { q:'¿Cuántas casillas se mueve el Rey durante el enroque corto?', opts:['1 casilla','2 casillas','3 casillas','No se mueve'], ans:1, exp:'El Rey se mueve exactamente 2 casillas hacia la Torre. La Torre luego salta al otro lado del Rey.' },
+  { q:'¿Qué pieza puede saltar por encima de otras piezas?', opts:['La Torre','El Alfil','El Caballo','La Reina'], ans:2, exp:'El Caballo es la única pieza en ajedrez que puede saltar sobre otras piezas. Se mueve en "L": 2+1 o 1+2 casillas.' },
+  { q:'¿Qué es el "Gambito de Rey"?', opts:['Una trampa con el Rey','Una apertura donde se sacrifica el peón f','Un final con Rey y Reina','Una defensa siciliana'], ans:1, exp:'El Gambito de Rey (1.e4 e5 2.f4) ofrece el peón de f4 a cambio de control central y juego de ataque.' },
+  { q:'Un peón llega al otro extremo del tablero. ¿Qué ocurre?', opts:['El peón explota','El peón se convierte en cualquier pieza','El peón vuelve al inicio','El juego termina en tablas'], ans:1, exp:'¡Coronación! El peón puede convertirse en Reina, Torre, Alfil o Caballo. Casi siempre se elige la Reina.' },
+  { q:'¿Cuántos puntos vale aproximadamente la Reina?', opts:['5 puntos','7 puntos','9 puntos','12 puntos'], ans:2, exp:'La Reina vale 9 puntos (sistema estándar). Torre=5, Alfil=3, Caballo=3, Peón=1.' },
+  { q:'¿Qué es el "ahogado" (stalemate)?', opts:['El Rey está en jaque mate','El Rey está en jaque doble','El jugador no tiene movimientos pero su Rey no está en jaque','El jugador pierde por tiempo'], ans:2, exp:'El ahogado (stalemate) ocurre cuando el jugador no tiene movimientos legales pero su Rey NO está en jaque. El resultado es TABLAS (empate).' },
+  { q:'¿Cuántas casillas del mismo color controla cada Alfil?', opts:['16 casillas','32 casillas','64 casillas','Depende del tablero'], ans:1, exp:'Cada Alfil controla 32 casillas de un solo color. Por eso se dice que un alfil solo "ve" la mitad del tablero.' },
+  { q:'Para enrocar, ¿cuál de estas condiciones NO es necesaria?', opts:['El Rey no debe haberse movido','No puede haber piezas entre el Rey y la Torre','El Rey NO debe estar en jaque mate','La Torre no debe haberse movido'], ans:2, exp:'La condición es que el Rey no esté en jaque (no en jaque mate, que ya implicaría fin de partida). El jaque mate es una condición diferente.' },
+  { q:'¿Cuál es el primer movimiento de la Defensa Siciliana?', opts:['1...e5','1...c5','1...d5','1...Nf6'], ans:1, exp:'La Defensa Siciliana comienza con 1...c5. Es la respuesta más popular al 1.e4 en ajedrez de alto nivel.' },
+  { q:'¿Qué táctica ocurre cuando una pieza ataca dos piezas rivales al mismo tiempo?', opts:['Clavada','Descubierta','Horquilla','Sacrificio'], ans:2, exp:'La Horquilla (Fork) ocurre cuando una pieza ataca dos o más piezas rivales simultáneamente. El Caballo es el maestro de las horquillas.' },
+];
+
+let qIdx = 0, score = 0, answered = false;
+
+function renderQuestion() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('quizQ').textContent = q.q;
+  document.getElementById('qNum').textContent = qIdx+1;
+  document.getElementById('scoreNum').textContent = score;
+  document.getElementById('quizProgress').style.width = ((qIdx+1)/10*100)+'%';
+  document.getElementById('quizFeedback').classList.remove('show');
+  document.getElementById('nextBtn').style.display = 'none';
+  answered = false;
+  document.getElementById('quizOpts').innerHTML = q.opts.map((o,i) => `<button class="quiz-opt" onclick="answerQ(${i})">${o}</button>`).join('');
+}
+
+function answerQ(i) {
+  if (answered) return;
+  answered = true;
+  const q = QUESTIONS[qIdx];
+  const opts = document.querySelectorAll('.quiz-opt');
+  opts.forEach((o,idx) => {
+    o.disabled = true;
+    if (idx === q.ans) o.classList.add('correct');
+    else if (idx === i && i !== q.ans) o.classList.add('wrong');
+  });
+  if (i === q.ans) { score++; document.getElementById('scoreNum').textContent = score; }
+  const fb = document.getElementById('quizFeedback');
+  fb.textContent = (i===q.ans?'✓ Correcto! ':'✗ Incorrecto. ') + q.exp;
+  fb.style.borderLeftColor = i===q.ans ? '#00c850' : '#ff4444';
+  fb.style.color = i===q.ans ? '#00ff88' : '#ff8888';
+  fb.classList.add('show');
+  if (qIdx < 9) document.getElementById('nextBtn').style.display = 'inline-block';
+  else showQuizResult();
+}
+
+function nextQuestion() { qIdx++; renderQuestion(); }
+function resetQuiz() { qIdx=0; score=0; answered=false; renderQuestion(); }
+function showQuizResult() {
+  setTimeout(() => {
+    const pct = Math.round(score/10*100);
+    const msg = pct>=80?'¡Eres un Maestro del Ajedrez! 🔥':pct>=50?'¡Buen trabajo! Sigue practicando. ⚔':'¡Sigue estudiando las lecciones! 📖';
+    document.getElementById('quizBox').innerHTML = `
+      <div style="text-align:center;padding:2rem;">
+        <div style="font-family:'Cinzel Decorative',serif;font-size:0.9rem;color:var(--gold);margin-bottom:0.5rem;">Resultado Final</div>
+        <div style="font-size:3rem;font-family:'Cinzel Decorative',serif;color:var(--ember);margin:1rem 0;">${score}/10</div>
+        <div style="font-family:'IM Fell English',serif;font-style:italic;color:#d4b88a;font-size:1rem;margin-bottom:2rem;">${msg}</div>
+        <button class="b-btn primary" onclick="resetQuizFull()">↺ Jugar de Nuevo</button>
+      </div>`;
+  }, 800);
+}
+function resetQuizFull() {
+  qIdx=0;score=0;answered=false;
+  document.getElementById('quizBox').innerHTML = `
+    <div class="quiz-score">Puntuación: <span id="scoreNum">0</span> / <span id="scoreTotal">10</span>&nbsp;·&nbsp; Pregunta <span id="qNum">1</span>/10<div class="progress-bar-wrap"><div class="progress-bar-fill" id="quizProgress" style="width:10%"></div></div></div>
+    <div class="quiz-q" id="quizQ"></div><div class="quiz-opts" id="quizOpts"></div>
+    <div class="quiz-feedback" id="quizFeedback"></div>
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;"><button class="b-btn primary" id="nextBtn" onclick="nextQuestion()" style="display:none;">Siguiente →</button><button class="b-btn" onclick="resetQuiz()">↺ Reiniciar Quiz</button></div>`;
+  renderQuestion();
+}
+
+// ═══════════════════════════════════════
+// PARTICLES
+// ═══════════════════════════════════════
+const canvas = document.getElementById('particles'), ctx = canvas.getContext('2d');
+let W = canvas.width = window.innerWidth, H = canvas.height = window.innerHeight;
+window.addEventListener('resize', ()=>{ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; });
+const embers = Array.from({length:70}, ()=>({
+  x:Math.random()*window.innerWidth, y:window.innerHeight+Math.random()*100,
+  size:Math.random()*2+0.5, speed:Math.random()*0.7+0.2,
+  drift:(Math.random()-0.5)*0.4, alpha:Math.random()*0.5+0.1, hue:Math.random()*60+5
+}));
+function drawEmbers(){
+  ctx.clearRect(0,0,W,H);
+  embers.forEach(e=>{
+    e.y-=e.speed; e.x+=e.drift;
+    e.alpha+=(Math.random()-0.5)*0.02;
+    e.alpha=Math.max(0.05,Math.min(0.65,e.alpha));
+    if(e.y<-10){e.y=H+10;e.x=Math.random()*W;}
+    ctx.beginPath(); ctx.arc(e.x,e.y,e.size,0,Math.PI*2);
+    ctx.fillStyle=`hsla(${e.hue},100%,60%,${e.alpha})`; ctx.fill();
+  });
+  requestAnimationFrame(drawEmbers);
+}
+drawEmbers();
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+initBoard();
+renderBoard();
+renderLessons();
+renderGambits();
+renderQuestion();
+</script>
+</body>
+</html>
